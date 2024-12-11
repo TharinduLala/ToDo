@@ -1,6 +1,3 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-paper";
 import { NavigationContainer,DefaultTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SplashScreen from "./src/screens/SplashScreen";
@@ -12,7 +9,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
       <NavigationContainer>
-        <Stack.Navigator initialRouteName='Dashboard'>
+        <Stack.Navigator initialRouteName='Splash'>
           <Stack.Screen name='Splash' component={SplashScreen} options={{ headerShown: false }} />
           <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
           <Stack.Screen

@@ -103,6 +103,9 @@ Ensure you have the following installed on your machine:
    ```bash
    npx expo start
    ```
+use this email and password to login user already created
+
+{"email": "saman@gmail.com","password": "1234"}
 
 ### Project Directory Structure
 
