@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
     }
 
     const token = await User.generateAuthToken(user);
-    res.json({ message: "Login successful", token });
+    res.json({ message: "Login successful",token });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

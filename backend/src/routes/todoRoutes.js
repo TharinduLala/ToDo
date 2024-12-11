@@ -6,7 +6,8 @@ const authMiddleware = require('../config/authMiddleware');
 
 router.post('/', authMiddleware, toDoController.addTodo);
 router.get('/', authMiddleware, toDoController.getTodos); 
-router.put('/:id', authMiddleware, toDoController.updateTodo);  
+router.put('/status/:id', authMiddleware, toDoController.updateTodoStatus);  
+router.put('/:id', authMiddleware, toDoController.updateTodo); 
 router.delete('/:id', authMiddleware, toDoController.deleteTodo);
 
 module.exports = router;

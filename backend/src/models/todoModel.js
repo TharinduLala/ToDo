@@ -1,6 +1,6 @@
 const db = require("../config/db");
 const uuid = require("uuid");
-const { parse,format } = require('date-fns');
+const {format } = require('date-fns');
 
 class Todo {
   constructor(id, title, description, is_completed, priority, due_date, user_id, created_at) {
@@ -16,7 +16,11 @@ class Todo {
 
   static async addTodo(user_id, title, description, priority, due_date) {
     const id = uuid.v4(); // Generate a unique ID for todo
-    const created_at = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+    
+    const created_at = format(new Date().toString('en-GB'), 'yyyy-MM-dd HH:mm:ss');
+    console.log(created_at);
+    
+    const dueDate = format(due_date, 'yyyy-MM-dd');
     
     const query =
       "INSERT INTO todos (id, title, description, is_completed, priority, due_date, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -28,11 +32,11 @@ class Todo {
         description,
         0,
         priority,
-        due_date,
+        dueDate,
         user_id,
         created_at,
       ]);
-      return new Todo(id, title, description, 0, priority, due_date, user_id, created_at); // Return the new todo
+      return new Todo(id, title, description, 0, priority, due_date, user_id, created_at);
     } catch (error) {
       throw error;
     }
@@ -61,11 +65,23 @@ class Todo {
   }
 
   static async updateTodo(id, title, description, is_completed, priority, due_date) {
+    const dueDate = format(due_date, 'yyyy-MM-dd');
     const query =
       "UPDATE todos SET title = ?, description = ?, is_completed = ?, priority = ?, due_date = ? WHERE id = ?";
 
     try {
-      await db.query(query, [title, description, is_completed, priority, due_date, id]);
+      await db.query(query, [title, description, is_completed, priority, dueDate, id]);
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async updateTodoStatus(id, is_completed) {
+    
+    const query =
+      "UPDATE todos SET is_completed = ? WHERE id = ?";
+
+    try {
+      await db.query(query, [is_completed,id]);
     } catch (error) {
       throw error;
     }

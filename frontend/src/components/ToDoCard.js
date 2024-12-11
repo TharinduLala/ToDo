@@ -1,10 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { Card, IconButton,Checkbox } from "react-native-paper";
+import { Card, IconButton, Checkbox } from "react-native-paper";
 
-const ToDoCard = ({ item, onPress ,onStatusChange}) => {
-  const navigation=useNavigation();
+const ToDoCard = ({ item, onPress, onStatusChange, onDelete }) => {
+  const navigation = useNavigation();
   const [checked, setChecked] = useState(item.is_completed);
   const getPriorityStyle = (priority) => {
     switch (priority) {
@@ -19,30 +19,29 @@ const ToDoCard = ({ item, onPress ,onStatusChange}) => {
     }
   };
   const handleCheckboxPress = () => {
-    const newStatus = !checked; // Toggle the status
-    setChecked(newStatus); // Update the local state
-    onStatusChange(item.id, newStatus); // Notify the parent to update the global state
+    const newStatus = !checked;
+    setChecked(newStatus);
+    onStatusChange(item.id, newStatus);
   };
   return (
     <TouchableOpacity onPress={() => onPress(item)}>
       <Card style={[styles.cardContainer, getPriorityStyle(item.priority)]}>
         <Card.Title
-        theme={{dark:false}}
+          theme={{ dark: false }}
           title={item.title}
-          titleVariant="titleSmall"
+          titleVariant='titleSmall'
           left={() => (
-            <Checkbox
-              status={checked ? "checked" : "unchecked"}
-              onPress={handleCheckboxPress}
-            />
+            <Checkbox status={checked ? "checked" : "unchecked"} onPress={handleCheckboxPress} />
           )}
           right={() => (
             <View style={styles.iconContainer}>
-              <IconButton  icon='pencil' onPress={() => navigation.navigate("AddEditTodo",{todo:item})} />
-              <IconButton  icon='delete' onPress={() => console.log("Delete pressed")} />
+              <IconButton
+                icon='pencil'
+                onPress={() => navigation.navigate("AddEditTodo", { todo: item })}
+              />
+              <IconButton icon='delete' onPress={() => onDelete(item.id)} />
             </View>
           )}
-          
         />
       </Card>
     </TouchableOpacity>
@@ -53,7 +52,7 @@ const styles = StyleSheet.create({
   medium: { borderColor: "#DEFF0A80" },
   low: { borderColor: "#0AFF9980" },
   cardContainer: {
-    borderWidth: 5,
+    borderWidth: 3,
     marginHorizontal: 20,
     marginVertical: 10,
     justifyContent: "center",

@@ -27,21 +27,3 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-
-// const { parse, format } = require('date-fns');
-
-// // Original date string
-// const dateString = '25-12-2024 11:18:33 PM';
-
-// // Parse the date string into a Date object using a custom format
-// const parsedDate = parse(dateString, 'dd-MM-yyyy hh:mm:ss a', new Date());
-
-// // Extract components
-// const day = format(parsedDate, 'dd');
-// const month = format(parsedDate, 'MM');
-// const year = format(parsedDate, 'yyyy');
-// const hour = format(parsedDate, 'HH');  // 24-hour format
-// const minute = format(parsedDate, 'mm');
-
-// console.log(`Day: ${day}, Month: ${month}, Year: ${year}, Hour: ${hour}, Minute: ${minute}`);

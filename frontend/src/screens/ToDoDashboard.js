@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import axios from "axios";
 import { FAB, Portal, PaperProvider, Text, Chip } from "react-native-paper";
@@ -7,15 +7,15 @@ import ToDoCard from "../components/ToDoCard";
 import { Calendar } from "react-native-calendars";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@env";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ToDoDashboard({ navigation }) {
-  const [todos, setTodos] = useState([]);
-  const [todoFilter, setTodoFilter] = useState("All");
-  const [filteredTodos, setFilteredTodos] = useState([]);
+  const [todos, setTodos] = useState([]); // All todos from the server
+  const [todoFilter, setTodoFilter] = useState("All"); // Current filter ("All", "Completed", "Pending")
+  const [filteredTodos, setFilteredTodos] = useState([]); // Filtered todos based on the selected date and filter
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-  // await AsyncStorage.getItem("userToken")
+  const [selectedDate, setSelectedDate] = useState(""); // Date selected in calendar
 
   const showModal = (todo) => {
     setSelectedTodo(todo);
@@ -25,17 +25,27 @@ export default function ToDoDashboard({ navigation }) {
   const hideModal = () => {
     setModalVisible(false);
   };
+  useFocusEffect(
+    useCallback(() => {
+      fetchTodos();
+    }, [])
+  );
 
   useEffect(() => {
-    fetchTodos();
-  }, []);
+    // Apply filtering logic when todos or selectedDate or todoFilter changes
+    if (todos.length > 0) {
+      const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
+      const dateToFilter = selectedDate || today; // Default to today's date if no date selected
+      setFilteredTodos(filterToDos(todoFilter, dateToFilter));
+    }
+  }, [todos, selectedDate, todoFilter]); // Re-run the filter when any of these change
 
   const fetchTodos = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
 
       if (!token) {
-        alert("Authentication Error", "User not authenticated");
+        alert("Session expired. Please log in again.");
         navigation.replace("Login");
         return;
       }
@@ -44,18 +54,23 @@ export default function ToDoDashboard({ navigation }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      const today = new Date().toISOString().split("T")[0];
+
       setTodos(response.data);
-      
-      setFilteredTodos(response.data.filter((item) => item.due_date == today));
-      setSelectedDate(today)
-      
+      // Apply initial filter once todos are fetched
+      const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
+      setSelectedDate(today); // Set today's date as default selected date
     } catch (error) {
       console.error("Error fetching todos:", error);
       alert("Error", "Failed to fetch todos");
     }
   };
-
+  const confirmDelete = (todoId) => {
+    // Show confirmation alert
+    const confirm = window.confirm("Are you sure you want to delete this todo?");
+  if (confirm) {
+    deleteTodo(todoId);
+  }
+  };
   const renderTodo = ({ item }) => (
     <ToDoCard
       item={item}
@@ -63,40 +78,102 @@ export default function ToDoDashboard({ navigation }) {
         showModal(item);
       }}
       onStatusChange={updateTodoStatus}
-    ></ToDoCard>
+      onDelete={confirmDelete}
+    />
   );
 
   const filterToDosByDate = (date) => {
-    return(todos.filter((item) => item.due_date == date));
+    return todos.filter((item) => item.due_date === date);
   };
 
-  const filterToDos = (newFilter,date) => {
-    
-    setTodoFilter(newFilter)
-    let temp=filterToDosByDate(date);
-    
-    switch (newFilter) {
+  const filterToDos = (filter, date) => {
+    let filteredByDate = filterToDosByDate(date);
+    switch (filter) {
       case "Completed":
-        setFilteredTodos(temp.filter((todo) => todo.is_completed))
-        break;
+        return filteredByDate.filter((todo) => todo.is_completed);
       case "Pending":
-        setFilteredTodos(temp.filter((todo) => !todo.is_completed))
-        break;
-      default:setFilteredTodos(temp)
-        break;
+        return filteredByDate.filter((todo) => !todo.is_completed);
+      default:
+        return filteredByDate;
     }
   };
 
-  const updateTodoStatus = (todoId, status) => {
-    console.log(todoId + " " + status);
+  const deleteTodo = async (todoId) => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        navigation.replace("Login");
+        return;
+      }
+
+      // Send DELETE request to API to delete the todo
+      const response = await axios.delete(`${API_URL}/todos/${todoId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        alert("Todo deleted successfully!");
+        // Remove the deleted todo from state
+
+        setTodos(todos.filter((todo) => todo.id !== todoId));
+        setFilteredTodos(filteredTodos.filter((todo) => todo.id !== todoId));
+      } else {
+        alert("Failed to delete todo");
+      }
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+      alert("Error", "Failed to delete todo");
+    }
+  };
+
+  const updateTodoStatus = async (todoId, status) => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        navigation.replace("Login");
+        return;
+      }
+
+      const updatedTodo = {
+        isCompleted: status, // Update status (true/false)
+      };
+
+      // Make PUT request to update the todo status
+      const response = await axios.put(`${API_URL}/todos/status/${todoId}`, updatedTodo, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        console.log(response.data.message);
+        // Update the todos directly in state after status change
+        setTodos((prevTodos) => {
+          return prevTodos.map((todo) =>
+            todo.id === todoId ? { ...todo, is_completed: status } : todo
+          );
+        });
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error updating todo status:", error);
+      alert("Error", "Failed to update todo status");
+    }
   };
 
   return (
     <View style={styles.container}>
       <Calendar
+        style={{ marginTop: 0, paddingTop: 0 }}
         onDayPress={(day) => {
           setSelectedDate(day.dateString);
-          filterToDos(todoFilter,day.dateString);
         }}
         markedDates={{
           [selectedDate]: { selected: true, disableTouchEvent: true, selectedColor: "#7845ac" },
@@ -106,20 +183,20 @@ export default function ToDoDashboard({ navigation }) {
         showWeekNumbers={true}
       />
       <View style={styles.chipContainer}>
-        <Chip mode='flat' selected={todoFilter === "All"} onPress={() => filterToDos("All",selectedDate)}>
+        <Chip mode='flat' selected={todoFilter === "All"} onPress={() => setTodoFilter("All")}>
           All
         </Chip>
         <Chip
           mode='flat'
           selected={todoFilter === "Completed"}
-          onPress={() => filterToDos("Completed",selectedDate)}
+          onPress={() => setTodoFilter("Completed")}
         >
           Completed
         </Chip>
         <Chip
           mode='flat'
           selected={todoFilter === "Pending"}
-          onPress={() => filterToDos("Pending",selectedDate)}
+          onPress={() => setTodoFilter("Pending")}
         >
           Pending
         </Chip>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, TextInput,StyleSheet} from "react-native";
 import { Button, Text } from "react-native-paper";
 import { API_URL } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }) {
 
     try {
       const response = await axios.post(`${API_URL}/users/login`, { email, password });
-      const { token } = response.data;
+      const {token } = response.data;
 
       if (token) {
         await AsyncStorage.setItem("userToken", token);
@@ -72,11 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   title: {
-    // fontSize: 24,
-    // fontWeight: 'bold',
-    // marginBottom: 20,
     textAlign: "center",
-    // fontSize:12
   },
   input: {
     borderWidth: 1,

@@ -1,16 +1,26 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, Image } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
-    setTimeout(() => {
-      navigation.replace('Login');
-    }, 3000);
+    const timer = setTimeout(() => {
+      checkLogin();
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
-
+  
+  const checkLogin = async () => {
+    const token = await AsyncStorage.getItem("userToken");
+    if (token) {
+      navigation.replace("Dashboard");
+    } else {
+      navigation.replace("Login");
+    }
+  };
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/splash.jpg')} style={styles.logo} />
+      <Image source={require("../assets/splash.jpg")} style={styles.logo} />
       <Text style={styles.title}>Welcome to ToDo App</Text>
     </View>
   );
@@ -19,9 +29,9 @@ export default function SplashScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
   logo: {
     width: 100,
@@ -29,7 +39,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
   },
 });
