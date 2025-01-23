@@ -3,6 +3,17 @@
 
 This is a full-stack To-Do application that enables users to manage their tasks effectively. The app is built using **React Native Expo** for the front end, **Node.js** and **Express.js** for the back end, and **MySQL** for the database. It leverages **React Native Paper** for UI components, providing a sleek and modern design.
 
+<table>
+  <tr>
+    <td><img src="./AppSS1.png" width="200"></td>
+    <td><img src="./AppSS2.png" width="200"></td>
+  </tr>
+  <tr>
+    <td><img src="./AppSS3.png" width="200"></td>
+    <td><img src="./AppSS4.png" width="200"></td>
+  </tr>
+</table>
+
 ## Features
 
 - Add, edit, and delete tasks.
@@ -132,14 +143,5 @@ ToDO
 └── README.md
 ```
 
-<table>
-  <tr>
-    <td><img src="./AppSS1.png" width="200"></td>
-    <td><img src="./AppSS2.png" width="200"></td>
-  </tr>
-  <tr>
-    <td><img src="./AppSS3.png" width="200"></td>
-    <td><img src="./AppSS4.png" width="200"></td>
-  </tr>
-</table>
+
 
